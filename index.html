@@ -39,13 +39,10 @@
         function StreetView({ location }) {
             const [imageUrl, setImageUrl] = useState('');
             const [loading, setLoading] = useState(true);
-            const [error, setError] = useState(false);
 
             useEffect(() => {
                 if (location) {
                     setLoading(true);
-                    setError(false);
-
                     // Generate a random bearing for variety
                     const bearing = Math.floor(Math.random() * 360);
                     const pitch = Math.floor(Math.random() * 20) - 10; // -10 to 10 degrees
@@ -54,46 +51,16 @@
                     const url = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/${location.lng},${location.lat},16,${bearing},${pitch}/800x600@2x?access_token=${MAPBOX_TOKEN}`;
 
                     setImageUrl(url);
-
-                    // Simulate loading time
-                    setTimeout(() => {
-                        setLoading(false);
-                    }, 500);
+                    setLoading(false);
                 }
             }, [location]);
 
-            if (!location) {
+            if (!location || loading) {
                 return (
                     <div className="street-view-container h-full">
                         <div className="text-center">
-                            <div className="text-6xl mb-4">🌍</div>
-                            <h2 className="text-2xl font-bold mb-2">Starting Game...</h2>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (loading) {
-                return (
-                    <div className="street-view-container h-full">
-                        <div className="text-center">
-                            <div className="text-6xl mb-4 animate-pulse">📍</div>
+                            <div className="text-6xl mb-4">📍</div>
                             <h2 className="text-2xl font-bold mb-2">Loading Location...</h2>
-                            <div className="w-16 h-1 bg-white bg-opacity-30 rounded-full mx-auto">
-                                <div className="h-full bg-white rounded-full animate-pulse"></div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (error) {
-                return (
-                    <div className="street-view-container h-full">
-                        <div className="text-center">
-                            <div className="text-6xl mb-4">🗺️</div>
-                            <h2 className="text-2xl font-bold mb-2">Mystery Location</h2>
-                            <p className="text-lg opacity-80">Where in the world are you?</p>
                         </div>
                     </div>
                 );
@@ -106,10 +73,9 @@
                         alt="Street view"
                         className="w-full h-full object-cover"
                         onError={() => {
-                            setError(true);
-                        }}
-                        onLoad={() => {
-                            setLoading(false);
+                            // Fallback to satellite view if street view fails
+                            const fallbackUrl = `https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/static/${location.lng},${location.lat},17/800x600@2x?access_token=${MAPBOX_TOKEN}`;
+                            setImageUrl(fallbackUrl);
                         }}
                     />
                     <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded-lg text-sm">
@@ -119,7 +85,7 @@
             );
         }
 
-        // Expanded locations for different regions with many more cities
+        // Sample locations for different regions (Street View verified)
         const LOCATIONS = {
             world: [
                 // Europe
@@ -165,6 +131,62 @@
                 { lat: 27.6844, lng: 85.3446, name: "Bhaktapur, Nepal" },
                 { lat: 26.4838, lng: 87.2832, name: "Biratnagar, Nepal" },
                 { lat: 27.5330, lng: 84.5000, name: "Chitwan, Nepal" },
+                { lat: 28.6129, lng: 77.2295, name: "India Gate, New Delhi" },
+  { lat: 28.5245, lng: 77.1855, name: "Qutub Minar, Delhi" },
+  { lat: 27.1751, lng: 78.0421, name: "Taj Mahal, Agra" },
+  { lat: 27.4975, lng: 77.6720, name: "Prem Mandir, Vrindavan" },
+  { lat: 26.9124, lng: 75.7873, name: "Hawa Mahal, Jaipur" },
+  { lat: 25.1972, lng: 75.8648, name: "Bundi Stepwell, Rajasthan" },
+  { lat: 26.3051, lng: 73.0151, name: "Mehrangarh Fort, Jodhpur" },
+  { lat: 24.5854, lng: 73.7125, name: "Lake Pichola, Udaipur" },
+  { lat: 28.0034, lng: 79.4204, name: "Rampur, Uttar Pradesh" },
+
+  // Uttarakhand & Himachal
+  { lat: 30.0668, lng: 79.0193, name: "Rudraprayag, Uttarakhand" },
+  { lat: 30.0668, lng: 78.2916, name: "Rishikesh, Ganga Ghats" },
+  { lat: 30.3792, lng: 78.4741, name: "Mussoorie, Mall Road" },
+  { lat: 32.2396, lng: 77.1887, name: "Manali, Himachal Pradesh" },
+  { lat: 32.7266, lng: 76.9480, name: "Keylong, Himachal Pradesh" },
+  { lat: 31.6330, lng: 74.8723, name: "Golden Temple, Amritsar" },
+
+  // Central India
+  { lat: 23.2599, lng: 77.4126, name: "Bhopal, Madhya Pradesh" },
+  { lat: 24.5854, lng: 73.7125, name: "Chittorgarh Fort" },
+  { lat: 21.1944, lng: 81.3509, name: "Raipur, Chhattisgarh" },
+  { lat: 23.8315, lng: 91.2820, name: "Ujjayanta Palace, Tripura" },
+
+  // Eastern India
+  { lat: 22.5726, lng: 88.3639, name: "Howrah Bridge, Kolkata" },
+  { lat: 26.1445, lng: 91.7362, name: "Guwahati, Assam" },
+  { lat: 25.6106, lng: 85.1414, name: "Patna, Bihar" },
+  { lat: 21.2787, lng: 81.8661, name: "Bilaspur, Chhattisgarh" },
+  { lat: 23.6102, lng: 85.2799, name: "Ranchi, Jharkhand" },
+  { lat: 27.4905, lng: 94.9120, name: "Ziro Valley, Arunachal Pradesh" },
+
+  // Western India
+  { lat: 18.5204, lng: 73.8567, name: "Pune, Maharashtra" },
+  { lat: 19.0760, lng: 72.8777, name: "Gateway of India, Mumbai" },
+  { lat: 22.3072, lng: 73.1812, name: "Vadodara, Gujarat" },
+  { lat: 23.0225, lng: 72.5714, name: "Ahmedabad, Gujarat" },
+  { lat: 21.1702, lng: 72.8311, name: "Surat, Gujarat" },
+  { lat: 20.0110, lng: 73.7903, name: "Nashik, Maharashtra" },
+  { lat: 15.2993, lng: 74.1240, name: "Old Goa Church Complex" },
+
+  // South India
+  { lat: 13.0827, lng: 80.2707, name: "Chennai Marina Beach" },
+  { lat: 12.9716, lng: 77.5946, name: "Bangalore, Karnataka" },
+  { lat: 9.9312, lng: 76.2673, name: "Fort Kochi, Kerala" },
+  { lat: 8.5241, lng: 76.9366, name: "Trivandrum, Kerala" },
+  { lat: 17.3850, lng: 78.4867, name: "Charminar, Hyderabad" },
+  { lat: 11.0168, lng: 76.9558, name: "Coimbatore, Tamil Nadu" },
+  { lat: 12.2958, lng: 76.6394, name: "Mysore Palace, Karnataka" },
+
+  // Islands and Unique Places
+  { lat: 10.2155, lng: 92.6385, name: "Cellular Jail, Andaman Islands" },
+  { lat: 9.9312, lng: 72.8459, name: "Minicoy Island, Lakshadweep" },
+  { lat: 33.7782, lng: 76.5762, name: "Leh City, Ladakh" },
+  { lat: 34.0837, lng: 74.7973, name: "Dal Lake, Srinagar" },
+  { lat: 31.1048, lng: 77.1734, name: "Shimla Mall Road, Himachal" },
 
                 // Americas
                 { lat: 40.7589, lng: -73.9851, name: "Times Square, New York" },
@@ -212,7 +234,96 @@
                 { lat: -23.6980, lng: 133.8807, name: "Alice Springs, Australia" },
                 { lat: -31.9535, lng: 115.8575, name: "Perth, Australia" },
                 { lat: -35.2809, lng: 149.1300, name: "Canberra, Australia" },
-                { lat: -37.8140, lng: 144.9633, name: "Melbourne, Australia" }
+                { lat: -37.8140, lng: 144.9633, name: "Melbourne, Australia" },
+                { lat: 6.9271, lng: 79.8612, name: "Galle Face Green, Colombo, Sri Lanka" },
+                { lat: 13.7563, lng: 100.5018, name: "Chinatown, Bangkok, Thailand" },
+                { lat: 10.8231, lng: 106.6297, name: "Ben Thanh Market, Ho Chi Minh City, Vietnam" },
+                { lat: 21.0285, lng: 105.8542, name: "Old Quarter, Hanoi, Vietnam" },
+                { lat: 39.9042, lng: 116.4074, name: "Forbidden City, Beijing, China" },
+                { lat: 25.2048, lng: 55.2708, name: "Old Souk, Dubai, UAE" },
+                { lat: 33.5138, lng: 36.2765, name: "Omayyad Mosque, Damascus, Syria" },
+                // 🌍 Africa
+                { lat: -1.2921, lng: 36.8219, name: "Nairobi National Park Entrance, Kenya" },
+                { lat: -17.8578, lng: 31.0292, name: "Harare Gardens, Zimbabwe" },
+                { lat: 9.0579, lng: 38.7613, name: "Meskel Square, Addis Ababa, Ethiopia" },
+                { lat: 31.6340, lng: -7.9999, name: "Jemaa el-Fnaa Square, Marrakech, Morocco" },
+                { lat: -4.0435, lng: 39.6682, name: "Old Town, Mombasa, Kenya" },
+                // 🌍 South America
+                { lat: -34.6037, lng: -58.3816, name: "La Boca Neighborhood, Buenos Aires, Argentina" },
+                { lat: -13.5319, lng: -71.9675, name: "San Pedro Market, Cusco, Peru" },
+                { lat: -16.5000, lng: -68.1500, name: "Witches' Market, La Paz, Bolivia" },
+                { lat: -12.0432, lng: -77.0282, name: "Miraflores District, Lima, Peru" },
+                { lat: -22.9068, lng: -43.1729, name: "Lapa Arches, Rio de Janeiro, Brazil" },
+
+                // 🌍 Central America & Caribbean
+                { lat: 18.4663, lng: -66.1057, name: "Old San Juan, Puerto Rico" },
+                { lat: 14.6349, lng: -90.5069, name: "Historic Center, Guatemala City" },
+                { lat: 13.7000, lng: -89.2000, name: "Plaza Barrios, San Salvador" },
+                { lat: 9.9333, lng: -84.0833, name: "Mercado Central, San José, Costa Rica" },
+
+                // 🌍 Eastern Europe & Balkans
+                { lat: 42.6975, lng: 23.3242, name: "Alexander Nevsky Cathedral, Sofia, Bulgaria" },
+                { lat: 44.7866, lng: 20.4489, name: "Skadarlija Street, Belgrade, Serbia" },
+                { lat: 41.9981, lng: 21.4254, name: "Old Bazaar, Skopje, North Macedonia" },
+                { lat: 42.4304, lng: 19.2594, name: "Shkodër Promenade, Albania" },
+                { lat: 43.8563, lng: 18.4131, name: "Baščaršija, Sarajevo, Bosnia & Herzegovina" },
+
+                // 🌍 Miscellaneous
+                { lat: -0.1807, lng: -78.4678, name: "Centro Histórico, Quito, Ecuador" },
+                { lat: 36.2021, lng: 37.1343, name: "Citadel of Aleppo, Syria" },
+                { lat: 47.3769, lng: 8.5417, name: "Limmatquai Street, Zurich, Switzerland" },
+                { lat: 55.6761, lng: 12.5683, name: "Nyhavn, Copenhagen, Denmark" },
+                { lat: 35.8997, lng: 14.5146, name: "Mdina Old City, Malta" },
+                { lat: 27.7172, lng: 85.3240, name: "Kathmandu Durbar Square" },
+                { lat: 27.6710, lng: 85.4298, name: "Patan Durbar Square, Lalitpur" },
+                { lat: 27.6736, lng: 85.4270, name: "Mahabouddha Temple, Patan" },
+                { lat: 27.6715, lng: 85.4322, name: "Kumbheshwar Temple, Lalitpur" },
+                { lat: 27.6717, lng: 85.3206, name: "Thamel, Kathmandu" },
+                { lat: 27.6763, lng: 85.4281, name: "Patan Museum" },
+                { lat: 27.6844, lng: 85.4286, name: "Bhaktapur Durbar Square" },
+                { lat: 27.6672, lng: 85.4276, name: "Kirtipur Old Town" },
+                { lat: 27.7333, lng: 85.2996, name: "Swayambhunath (Monkey Temple)" },
+
+                // Pokhara Region
+                { lat: 28.2096, lng: 83.9856, name: "Lakeside, Pokhara" },
+                { lat: 28.2419, lng: 83.9739, name: "World Peace Pagoda, Pokhara" },
+                { lat: 28.2155, lng: 83.9684, name: "Devi's Fall, Pokhara" },
+                { lat: 28.2639, lng: 83.9727, name: "Phewa Lake" },
+                { lat: 28.2611, lng: 83.9680, name: "Gupteshwor Mahadev Cave" },
+                { lat: 28.2657, lng: 83.9811, name: "Mahendra Cave, Pokhara" },
+
+                // Terai Cities
+                { lat: 27.0126, lng: 84.8808, name: "Birgunj, Parsa" },
+                { lat: 26.4838, lng: 87.2832, name: "Biratnagar, Morang" },
+                { lat: 27.5382, lng: 83.4880, name: "Bharatpur, Chitwan" },
+                { lat: 26.6785, lng: 87.1423, name: "Dharan, Sunsari" },
+                { lat: 26.6433, lng: 87.1235, name: "Itahari, Sunsari" },
+                { lat: 27.0930, lng: 84.8920, name: "Hetauda, Makwanpur" },
+                { lat: 26.6820, lng: 88.0782, name: "Birtamod, Jhapa" },
+                { lat: 26.8034, lng: 85.5593, name: "Janakpur Dham, Dhanusha" },
+                { lat: 27.5866, lng: 83.6033, name: "Butwal, Rupandehi" },
+                { lat: 27.4838, lng: 83.4377, name: "Lumbini, Birthplace of Buddha" },
+                { lat: 26.6537, lng: 85.2023, name: "Gaur, Rautahat" },
+
+                // Hilly Towns
+                { lat: 27.8810, lng: 84.4103, name: "Gorkha Durbar, Gorkha" },
+                { lat: 29.8402, lng: 80.5952, name: "Darchula Bazaar, Far West" },
+                { lat: 27.6085, lng: 85.2772, name: "Banepa, Kavre" },
+                { lat: 27.7245, lng: 85.2802, name: "Dhulikhel, Kavre" },
+                { lat: 28.0325, lng: 84.1263, name: "Bandipur, Tanahun" },
+                { lat: 28.1035, lng: 84.0190, name: "Damauli, Tanahun" },
+                { lat: 27.9383, lng: 84.3860, name: "Syangja Bazaar" },
+                { lat: 29.3315, lng: 82.1801, name: "Simikot, Humla (remote)" },
+                { lat: 29.0704, lng: 81.5735, name: "Jumla Bazaar" },
+
+                // Mid & Far Western
+                { lat: 28.7081, lng: 80.5884, name: "Dhangadhi, Kailali" },
+                { lat: 28.9879, lng: 80.1792, name: "Tikapur, Kailali" },
+                { lat: 28.3795, lng: 81.4213, name: "Gulariya, Bardiya" },
+                { lat: 27.9239, lng: 81.6296, name: "Nepalgunj, Banke" },
+                { lat: 28.1996, lng: 81.7377, name: "Tulsipur, Dang" },
+                { lat: 28.6288, lng: 81.3081, name: "Lamahi, Dang" },
+                { lat: 28.6131, lng: 81.0485, name: "Ghorahi, Dang" }
             ],
             usa: [
                 // Major Cities
@@ -293,17 +404,23 @@
                 { lat: 45.8150, lng: 15.9819, name: "Ban Jelačić Square, Zagreb" },
                 { lat: 46.0569, lng: 14.5058, name: "Prešeren Square, Ljubljana" },
                 { lat: 48.1486, lng: 17.1077, name: "Old Town, Bratislava" },
-                { lat: 50.4501, lng: 30.5234, name: "Independence Square, Kiev" }
+                { lat: 50.4501, lng: 30.5234, name: "Independence Square, Kiev" },
+                // 🌍 Europe
+                { lat: 59.9139, lng: 10.7522, name: "Aker Brygge, Oslo, Norway" },
+                { lat: 64.1265, lng: -21.8174, name: "Hallgrímskirkja Church, Reykjavik, Iceland" },
+                { lat: 47.4979, lng: 19.0402, name: "Fisherman's Bastion, Budapest, Hungary" },
+                { lat: 54.6872, lng: 25.2797, name: "Old Town, Vilnius, Lithuania" },
+                { lat: 56.9496, lng: 24.1052, name: "Freedom Monument, Riga, Latvia" },
+                { lat: 52.2297, lng: 21.0122, name: "Łazienki Park, Warsaw, Poland" }
             ]
         };
 
-        // Using a mapbox token
         const MAPBOX_TOKEN = 'pk.eyJ1Ijoic2FyaWtnYXV0YW0iLCJhIjoiY2s0NW5nY3VrMGJhbjNtcGk1ZjVjc290byJ9.SsMxIG3adgCn5Zak24IKFg';
 
         function GeoGuessrGame() {
             const [gameState, setGameState] = useState('menu'); // menu, playing, results
             const [currentRound, setCurrentRound] = useState(1);
-            const [totalRounds, setTotalRounds] = useState(5);
+            const [totalRounds] = useState(10);
             const [score, setScore] = useState(0);
             const [roundScores, setRoundScores] = useState([]);
             const [currentLocation, setCurrentLocation] = useState(null);
@@ -311,12 +428,8 @@
             const [mapMode, setMapMode] = useState('world');
             const [showResult, setShowResult] = useState(false);
             const [distance, setDistance] = useState(0);
-            const [timeLeft, setTimeLeft] = useState(60);
-            const [timerDuration, setTimerDuration] = useState(60);
-            const [timerActive, setTimerActive] = useState(false);
             const mapContainer = useRef(null);
             const map = useRef(null);
-            const timerRef = useRef(null);
 
             // Calculate distance between two points using Haversine formula
             const calculateDistance = (lat1, lng1, lat2, lng2) => {
@@ -336,149 +449,36 @@
                 return Math.max(0, Math.round(5000 * Math.exp(-distance / 2000)));
             };
 
-            // Timer effect
-            useEffect(() => {
-                if (timerActive && timeLeft > 0 && !showResult) {
-                    timerRef.current = setTimeout(() => {
-                        setTimeLeft(prev => {
-                            const newTime = prev - 1;
-                            if (newTime === 0) {
-                                // Time's up - auto submit with no guess or current guess
-                                setTimeout(() => handleTimeUp(), 100);
-                            }
-                            return newTime;
-                        });
-                    }, 1000);
-                }
-
-                return () => {
-                    if (timerRef.current) {
-                        clearTimeout(timerRef.current);
-                    }
-                };
-            }, [timerActive, timeLeft, showResult]);
-
-            // Handle time up
-            const handleTimeUp = () => {
-                if (showResult || !timerActive) return; // Prevent double execution
-
-                setTimerActive(false);
-
-                if (!guessedLocation || !currentLocation) {
-                    // No guess made - assign maximum distance penalty
-                    const dist = 20000; // Maximum distance for scoring
-                    const roundScore = 0; // No points for no guess
-                    setDistance(dist);
-                    setScore(prev => prev + roundScore);
-                    setRoundScores(prev => [...prev, roundScore]);
-                    setShowResult(true);
-                } else {
-                    // Submit current guess
-                    const dist = calculateDistance(
-                        currentLocation.lat, currentLocation.lng,
-                        guessedLocation.lat, guessedLocation.lng
-                    );
-
-                    const roundScore = calculateScore(dist);
-                    setDistance(dist);
-                    setScore(prev => prev + roundScore);
-                    setRoundScores(prev => [...prev, roundScore]);
-                    setShowResult(true);
-
-                    // Add correct location marker
-                    if (map.current) {
-                        new mapboxgl.Marker({ color: 'green' })
-                            .setLngLat([currentLocation.lng, currentLocation.lat])
-                            .setPopup(new mapboxgl.Popup().setHTML(`<strong>${currentLocation.name}</strong>`))
-                            .addTo(map.current);
-
-                        // Draw line between guess and correct location
-                        if (map.current.getSource('route')) {
-                            map.current.removeLayer('route');
-                            map.current.removeSource('route');
-                        }
-
-                        map.current.addSource('route', {
-                            'type': 'geojson',
-                            'data': {
-                                'type': 'Feature',
-                                'properties': {},
-                                'geometry': {
-                                    'type': 'LineString',
-                                    'coordinates': [
-                                        [guessedLocation.lng, guessedLocation.lat],
-                                        [currentLocation.lng, currentLocation.lat]
-                                    ]
-                                }
-                            }
-                        });
-
-                        map.current.addLayer({
-                            'id': 'route',
-                            'type': 'line',
-                            'source': 'route',
-                            'layout': {
-                                'line-join': 'round',
-                                'line-cap': 'round'
-                            },
-                            'paint': {
-                                'line-color': '#ff6b6b',
-                                'line-width': 3,
-                                'line-dasharray': [2, 2]
-                            }
-                        });
-                    }
-                }
-            };
-
             // Initialize map
             useEffect(() => {
                 if (gameState === 'playing' && mapContainer.current && !map.current) {
-                    try {
-                        mapboxgl.accessToken = MAPBOX_TOKEN;
 
-                        map.current = new mapboxgl.Map({
-                            container: mapContainer.current,
-                            style: 'mapbox://styles/mapbox/streets-v11',
-                            center: [0, 20],
-                            zoom: 1.5
-                        });
+                    mapboxgl.accessToken = MAPBOX_TOKEN;
 
-                        map.current.on('load', () => {
-                            console.log('Map loaded successfully');
-                        });
+                    map.current = new mapboxgl.Map({
+                        container: mapContainer.current,
+                        style: 'mapbox://styles/mapbox/streets-v11',
+                        center: [0, 20],
+                        zoom: 1.5
+                    });
 
-                        map.current.on('error', (e) => {
-                            console.error('Map error:', e);
-                        });
+                    map.current.on('click', (e) => {
+                        if (!showResult) {
+                            const { lng, lat } = e.lngLat;
+                            setGuessedLocation({ lat, lng });
 
-                        map.current.on('click', (e) => {
-                            if (!showResult && timerActive) {
-                                const { lng, lat } = e.lngLat;
-                                setGuessedLocation({ lat, lng });
-
-                                // Clear existing markers
-                                const existingMarkers = document.querySelectorAll('.mapboxgl-marker[style*="red"]');
-                                existingMarkers.forEach(marker => marker.remove());
-
-                                // Add guess marker
-                                new mapboxgl.Marker({ color: 'red' })
-                                    .setLngLat([lng, lat])
-                                    .addTo(map.current);
-                            }
-                        });
-                    } catch (error) {
-                        console.error('Error initializing map:', error);
-                    }
+                            // Add guess marker
+                            new mapboxgl.Marker({ color: 'red' })
+                                .setLngLat([lng, lat])
+                                .addTo(map.current);
+                        }
+                    });
                 }
-            }, [gameState, showResult, timerActive]);
+            }, [gameState, showResult]);
 
             // Start new game
-            const startGame = (mode, rounds = 5, timer = 60) => {
-                console.log('Starting game with:', { mode, rounds, timer });
+            const startGame = (mode) => {
                 setMapMode(mode);
-                setTotalRounds(rounds);
-                setTimerDuration(timer);
                 setGameState('playing');
                 setCurrentRound(1);
                 setScore(0);
@@ -488,45 +488,23 @@
 
             // Start new round
             const startNewRound = (mode = mapMode) => {
-                console.log('Starting new round with mode:', mode);
                 const locations = LOCATIONS[mode] || LOCATIONS.world;
                 const randomLocation = locations[Math.floor(Math.random() * locations.length)];
-                console.log('Selected location:', randomLocation);
                 setCurrentLocation(randomLocation);
                 setGuessedLocation(null);
                 setShowResult(false);
                 setDistance(0);
-                setTimeLeft(timerDuration);
-                setTimerActive(true);
 
-                // Clear map markers and routes
+                // Clear map markers
                 if (map.current) {
                     const markers = document.querySelectorAll('.mapboxgl-marker');
                     markers.forEach(marker => marker.remove());
-
-                    if (map.current.getLayer && map.current.getLayer('route')) {
-                        map.current.removeLayer('route');
-                        map.current.removeSource('route');
-                    }
                 }
             };
 
             // Submit guess
             const submitGuess = () => {
-                if (!currentLocation || showResult) return;
-
-                setTimerActive(false);
-
-                if (!guessedLocation) {
-                    // No guess made
-                    const dist = 20000;
-                    const roundScore = 0;
-                    setDistance(dist);
-                    setScore(prev => prev + roundScore);
-                    setRoundScores(prev => [...prev, roundScore]);
-                    setShowResult(true);
-                    return;
-                }
+                if (!guessedLocation || !currentLocation) return;
 
                 const dist = calculateDistance(
                     currentLocation.lat, currentLocation.lng,
@@ -547,11 +525,6 @@
                         .addTo(map.current);
 
                     // Draw line between guess and correct location
-                    if (map.current.getSource('route')) {
-                        map.current.removeLayer('route');
-                        map.current.removeSource('route');
-                    }
-
                     map.current.addSource('route', {
                         'type': 'geojson',
                         'data': {
@@ -588,9 +561,15 @@
             const nextRound = () => {
                 if (currentRound < totalRounds) {
                     setCurrentRound(prev => prev + 1);
+
+                    // Remove route layer
+                    if (map.current && map.current.getLayer('route')) {
+                        map.current.removeLayer('route');
+                        map.current.removeSource('route');
+                    }
+
                     startNewRound();
                 } else {
-                    setTimerActive(false);
                     setGameState('results');
                 }
             };
@@ -598,10 +577,6 @@
             // Reset game
             const resetGame = () => {
                 setGameState('menu');
-                setTimerActive(false);
-                if (timerRef.current) {
-                    clearTimeout(timerRef.current);
-                }
                 if (map.current) {
                     map.current.remove();
                     map.current = null;
@@ -610,124 +585,37 @@
 
             // Menu Screen
             if (gameState === 'menu') {
-                const [selectedMode, setSelectedMode] = useState('world');
-                const [selectedRounds, setSelectedRounds] = useState(5);
-                const [selectedTimer, setSelectedTimer] = useState(60);
-
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full text-center">
+                        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
                             <h1 className="text-4xl font-bold text-gray-800 mb-2">GeoGuessr</h1>
                             <p className="text-gray-600 mb-8">Test your geography knowledge!</p>
 
-                            {/* Game Mode Selection */}
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-700 mb-3">Choose Game Mode</h3>
-                                <div className="space-y-3">
-                                    <button
-                                        onClick={() => setSelectedMode('world')}
-                                        className={`w-full font-semibold py-3 px-6 rounded-lg transition duration-200 ${selectedMode === 'world'
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                            }`}
-                                    >
-                                        🌍 World Mode
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedMode('usa')}
-                                        className={`w-full font-semibold py-3 px-6 rounded-lg transition duration-200 ${selectedMode === 'usa'
-                                                ? 'bg-red-600 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                            }`}
-                                    >
-                                        🇺🇸 USA Mode
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedMode('europe')}
-                                        className={`w-full font-semibold py-3 px-6 rounded-lg transition duration-200 ${selectedMode === 'europe'
-                                                ? 'bg-green-600 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                            }`}
-                                    >
-                                        🇪🇺 Europe Mode
-                                    </button>
-                                </div>
+                            <div className="space-y-4">
+                                <button
+                                    onClick={() => startGame('world')}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+                                >
+                                    🌍 World Mode
+                                </button>
+                                <button
+                                    onClick={() => startGame('usa')}
+                                    className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+                                >
+                                    🇺🇸 USA Mode
+                                </button>
+                                <button
+                                    onClick={() => startGame('europe')}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"
+                                >
+                                    🇪🇺 Europe Mode
+                                </button>
                             </div>
 
-                            {/* Round Selection */}
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-700 mb-3">Number of Rounds</h3>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {[5, 10, 15, 20].map(rounds => (
-                                        <button
-                                            key={rounds}
-                                            onClick={() => setSelectedRounds(rounds)}
-                                            className={`py-2 px-3 rounded-lg font-semibold transition duration-200 ${selectedRounds === rounds
-                                                    ? 'bg-purple-600 text-white'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                }`}
-                                        >
-                                            {rounds}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="mt-3">
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="50"
-                                        value={selectedRounds}
-                                        onChange={(e) => setSelectedRounds(Math.max(1, Math.min(50, parseInt(e.target.value) || 5)))}
-                                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        placeholder="Custom"
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Or enter custom (1-50)</p>
-                                </div>
-                            </div>
-
-                            {/* Timer Selection */}
-                            <div className="mb-8">
-                                <h3 className="text-lg font-semibold text-gray-700 mb-3">Timer per Round</h3>
-                                <div className="grid grid-cols-4 gap-2">
-                                    {[30, 60, 120, 300].map(seconds => (
-                                        <button
-                                            key={seconds}
-                                            onClick={() => setSelectedTimer(seconds)}
-                                            className={`py-2 px-3 rounded-lg font-semibold transition duration-200 text-sm ${selectedTimer === seconds
-                                                    ? 'bg-orange-600 text-white'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                }`}
-                                        >
-                                            {seconds < 60 ? `${seconds}s` : `${seconds / 60}m`}
-                                        </button>
-                                    ))}
-                                </div>
-                                <div className="mt-3">
-                                    <input
-                                        type="number"
-                                        min="10"
-                                        max="600"
-                                        value={selectedTimer}
-                                        onChange={(e) => setSelectedTimer(Math.max(10, Math.min(600, parseInt(e.target.value) || 60)))}
-                                        className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                        placeholder="Custom"
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Custom seconds (10-600)</p>
-                                </div>
-                            </div>
-
-                            {/* Start Game Button */}
-                            <button
-                                onClick={() => startGame(selectedMode, selectedRounds, selectedTimer)}
-                                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-lg transition duration-200 text-lg"
-                            >
-                                Start Game ({selectedRounds} rounds, {selectedTimer < 60 ? `${selectedTimer}s` : `${selectedTimer / 60}m`})
-                            </button>
-
-                            <div className="mt-6 text-sm text-gray-500">
+                            <div className="mt-8 text-sm text-gray-500">
+                                <p>• 10 rounds per game</p>
                                 <p>• Click on the map to guess</p>
                                 <p>• Closer guesses = higher scores</p>
-                                <p>• Max 5,000 points per round</p>
                             </div>
                         </div>
                     </div>
@@ -744,7 +632,7 @@
                             <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg p-6 mb-6">
                                 <h2 className="text-2xl font-bold">Final Score</h2>
                                 <p className="text-4xl font-bold">{score.toLocaleString()}</p>
-                                <p className="text-sm opacity-90">out of {(totalRounds * 5000).toLocaleString()} points</p>
+                                <p className="text-sm opacity-90">out of 25,000 points</p>
                             </div>
 
                             <div className="space-y-2 mb-6">
@@ -782,12 +670,6 @@
 
                         <div className="flex items-center space-x-6">
                             <div className="text-center">
-                                <p className="text-sm text-gray-600">Timer</p>
-                                <p className={`text-xl font-bold ${timeLeft <= 10 ? 'text-red-600' : timeLeft <= 30 ? 'text-orange-600' : 'text-blue-600'}`}>
-                                    {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                                </p>
-                            </div>
-                            <div className="text-center">
                                 <p className="text-sm text-gray-600">Round</p>
                                 <p className="text-xl font-bold">{currentRound}/{totalRounds}</p>
                             </div>
@@ -819,7 +701,7 @@
                             )}
 
                             {/* Guess Button */}
-                            {guessedLocation && !showResult && timerActive && (
+                            {guessedLocation && !showResult && (
                                 <div className="absolute bottom-4 left-4 right-4">
                                     <button
                                         onClick={submitGuess}
@@ -839,9 +721,8 @@
                                             +{calculateScore(distance).toLocaleString()} points
                                         </p>
                                         <p className="text-sm text-gray-600">
-                                            {distance >= 20000 ? 'No guess made' : `Distance: ${Math.round(distance).toLocaleString()} km`}
+                                            Distance: {Math.round(distance).toLocaleString()} km
                                         </p>
-                                        {timeLeft === 0 && <p className="text-sm text-red-600">⏰ Time's up!</p>}
                                         <p className="text-sm text-gray-700 mt-2">
                                             <strong>Correct location:</strong> {currentLocation?.name}
                                         </p>
@@ -863,7 +744,7 @@
 
         ReactDOM.render(<GeoGuessrGame />, document.getElementById('root'));
     </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9647b0d093ff5733',t:'MTc1MzQwNDkxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'964798d7118b130b',t:'MTc1MzQwMzkzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 
 </html>
